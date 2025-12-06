@@ -14,9 +14,9 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS
+  // Enable CORS - Allow all origins in production (Railway/cloud)
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: process.env.NODE_ENV === 'production' ? '*' : 'http://localhost:3000',
     credentials: true,
   });
 
@@ -31,8 +31,10 @@ async function bootstrap() {
     process.exit(1);
   });
 
-  await app.listen(3000, '127.0.0.1');
-  console.log('Server is running on http://127.0.0.1:3000');
+  const port = process.env.PORT || 3000;
+  // Bind to 0.0.0.0 for Railway/cloud deployment compatibility
+  await app.listen(port, '0.0.0.0');
+  console.log(`Application is running on port ${port}`);
 }
 
 bootstrap();

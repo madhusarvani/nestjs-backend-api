@@ -1,5 +1,5 @@
 ﻿import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -21,10 +21,15 @@ import { ProductsModule } from './products/products.module';
     TypeOrmModule.forRootAsync({
       useClass: DatabaseConfig,
     }),
-    PassportModule,
-    JwtModule.register({
-      secret: 'test-secret-key-do-not-use-in-production',
-      signOptions: { expiresIn: '3600s' },
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') || 'dev-secret-key-change-in-production',
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '3600s',
+        },
+      }),
     }),
     UsersModule,
     AuthModule,

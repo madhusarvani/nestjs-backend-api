@@ -20,8 +20,8 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
         entities: [User, Product],
         synchronize: true,
         dropSchema: false,
-        logging: ['error', 'warn'],
-        maxQueryExecutionTime: 5000,
+        logging: process.env.NODE_ENV === 'production' ? ['error'] : ['error', 'warn'],
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
       };
     }
 
