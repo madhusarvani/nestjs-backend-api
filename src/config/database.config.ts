@@ -9,6 +9,23 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
+    // Support Railway.app DATABASE_URL environment variable
+    const databaseUrl = this.configService.get<string>('DATABASE_URL');
+    
+    if (databaseUrl) {
+      // Use connection string provided by Railway
+      return {
+        type: 'postgres',
+        url: databaseUrl,
+        entities: [User, Product],
+        synchronize: true,
+        dropSchema: false,
+        logging: ['error', 'warn'],
+        maxQueryExecutionTime: 5000,
+      };
+    }
+
+    // Fallback to individual environment variables for local development
     return {
       type: 'postgres',
       host: this.configService.get<string>('DB_HOST', 'localhost'),
